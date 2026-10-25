@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LFTP · live protocol demo</title>
+  <style>
+    :root{color-scheme:dark;--bg:#071019;--panel:#101c29;--line:#233548;--ink:#e7f0f7;--muted:#91a5b7;--cyan:#51e0dc;--lime:#b4f278;--orange:#ffb454;--red:#ff7979}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#173247 0,transparent 55%),var(--bg);color:var(--ink);font:15px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+    main{width:min(1120px,calc(100% - 36px));margin:36px auto 64px}.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}.brand{font-size:13px;letter-spacing:.16em;color:var(--cyan);font-weight:800}.pill{border:1px solid #2c4153;border-radius:999px;padding:6px 11px;color:var(--muted);font-size:12px}
+    h1{font-size:clamp(30px,5vw,54px);line-height:1.04;letter-spacing:-.045em;margin:0 0 13px;max-width:800px}.intro{color:var(--muted);max-width:760px;margin:0 0 28px}.grid{display:grid;grid-template-columns:1fr 1.2fr;gap:18px}.card{background:linear-gradient(145deg,#122131,#0c1722);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 16px 50px #0003}.card h2{font-size:17px;margin:0 0 15px}.field{display:grid;gap:6px;margin:13px 0}.field label{font-size:12px;color:var(--muted);font-weight:650}.field input{width:100%;border:1px solid #2c4153;background:#08131d;color:var(--ink);border-radius:9px;padding:11px 12px;font:inherit}.row{display:grid;grid-template-columns:1fr 105px;gap:10px}.filebox{border:1px dashed #3b5968;border-radius:12px;padding:16px;background:#0a1520}.filebox input{border:0;padding:7px 0 0}.hint{color:var(--muted);font-size:12px;margin:8px 0 0}.primary{width:100%;border:0;border-radius:10px;background:var(--cyan);color:#041014;font-weight:850;padding:12px 14px;font:inherit;cursor:pointer;margin-top:12px}.primary:disabled{opacity:.55;cursor:wait}.idline{display:none;margin-top:12px;padding:10px;background:#0a1520;border-radius:9px;color:var(--muted);font-size:12px;word-break:break-all}.idline strong{color:var(--lime)}
+    .flow{position:relative;min-height:194px;border:1px solid #243a4c;border-radius:13px;background:linear-gradient(90deg,#0b1722 0%,#0b1722 49.5%,#0c1c26 50%,#0c1c26 100%);overflow:hidden;padding:20px}.ends{display:flex;justify-content:space-between;position:relative;z-index:2}.end{width:41%;}.end strong{display:block;font-size:14px}.end span{color:var(--muted);font-size:11px}.node{margin-top:13px;height:51px;border:1px solid #31485a;border-radius:10px;background:#101f2b;display:flex;align-items:center;justify-content:center;color:var(--cyan);font-size:12px;letter-spacing:.04em}.receiver .node{color:var(--lime)}.wire{position:absolute;left:23%;right:23%;top:92px;height:2px;background:linear-gradient(90deg,#49d7d3,#b4f278)}.wire:after{content:'›';position:absolute;right:-6px;top:-17px;font-size:28px;color:var(--lime)}.packet{position:absolute;top:82px;left:23%;width:14px;height:20px;border-radius:3px;background:var(--cyan);box-shadow:0 0 17px var(--cyan);opacity:0;z-index:3}.packet.fly{opacity:1;animation:fly .26s ease-in forwards}.packet.return{left:76%;background:var(--lime);box-shadow:0 0 17px var(--lime);opacity:1;animation:return .26s ease-in forwards}@keyframes fly{to{left:76%;opacity:.15}}@keyframes return{to{left:23%;opacity:.15}}.status{margin-top:13px;display:flex;gap:8px;align-items:center;color:var(--muted);font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:#708293}.dot.live{background:var(--lime);box-shadow:0 0 11px var(--lime)}
+    .progress{height:7px;background:#1a2c3b;border-radius:9px;margin:16px 0 7px;overflow:hidden}.bar{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--lime));transition:width .12s}.metrics{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}.log{margin-top:18px;max-height:205px;overflow:auto;border-top:1px solid var(--line);padding-top:10px}.logrow{display:grid;grid-template-columns:62px 1fr;gap:8px;padding:5px 0;font:12px/1.45 ui-monospace,SFMono-Regular,monospace;color:#b4c7d7}.logrow time{color:#7690a3}.tag{color:var(--cyan)}.notes{margin-top:18px;color:var(--muted);font-size:12px}.notes b{color:var(--ink)}.section{margin-top:24px}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.step{padding:13px;border:1px solid var(--line);border-radius:11px;background:#0d1924;color:var(--muted);font-size:12px}.step b{display:block;color:var(--ink);font-size:13px;margin-bottom:5px}.step em{color:var(--cyan);font-style:normal}
+    @media(max-width:760px){main{margin-top:22px}.grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}.flow{min-height:184px}.card{padding:17px}}
+  </style>
+</head>
+<body>
+<main>
+  <div class="top"><div class="brand">LFTP / PROTOCOL LAB</div><div class="pill">LOCAL DEMO · TCP · v1</div></div>
+  <h1>A file is more than a stream of bytes.</h1>
+  <p class="intro">Watch the project protocol offer a file, agree on a resume offset, move bounded DATA chunks, acknowledge saved progress, and verify the complete file before publishing it.</p>
+  <div class="grid">
+    <section class="card">
+      <h2>Send a file to another laptop</h2>
+      <div class="row"><div class="field"><label for="host">Receiver laptop IP</label><input id="host" placeholder="e.g. 192.168.1.20" autocomplete="off"></div><div class="field"><label for="port">TCP port</label><input id="port" value="9000" inputmode="numeric"></div></div>
+      <div class="filebox"><label for="file"><b>Choose a file</b></label><input id="file" type="file"><p class="hint">The browser hands the file to a localhost helper. The helper then uses LFTP over TCP to the receiver.</p></div>
+      <div class="field"><label for="resume">Resume ID (optional)</label><input id="resume" placeholder="Paste the previous 32-character transfer ID"></div>
+      <button class="primary" id="send">Start transfer</button>
+      <div class="idline" id="idline">Transfer ID: <strong id="idtext"></strong></div>
+      <p class="hint">For resume, choose the same unchanged file and paste its previous ID. The receiver never overwrites a different existing file.</p>
+    </section>
+    <section class="card">
+      <h2>Live message flow</h2>
+      <div class="flow"><div class="ends"><div class="end"><strong>Sender helper</strong><span>OFFER · DATA · FINISH</span><div class="node">SOURCE FILE</div></div><div class="end receiver"><strong>Receiver laptop</strong><span>READY · ACK · COMPLETE</span><div class="node">STAGED → VERIFIED</div></div></div><div class="wire"></div><div class="packet" id="packet"></div></div>
+      <div class="status"><span class="dot" id="dot"></span><span id="status">Waiting for a transfer</span></div>
+      <div class="progress"><div class="bar" id="bar"></div></div><div class="metrics"><span id="amount">0 B / 0 B</span><span id="percent">0%</span></div>
+      <div class="log" id="log" aria-live="polite"></div>
+      <div class="notes"><b>What is traveling?</b> Binary LFTP frames over TCP between laptops. The browser upload is a local handoff to the sender helper, not the protocol link. Packet animation is illustrative, not a timing or speed measurement.</div>
+    </section>
+  </div>
+  <section class="section"><div class="steps">
+    <div class="step"><b><em>01 · OFFER</em></b>Sender declares safe filename, size, digest and transfer ID.</div>
+    <div class="step"><b><em>02 · READY</em></b>Receiver says the next byte it still needs. On retry, this can be a saved offset.</div>
+    <div class="step"><b><em>03 · DATA / ACK</em></b>One 256 KiB-or-smaller chunk at a time. ACK follows file sync and checkpoint update.</div>
+    <div class="step"><b><em>04 · FINISH / COMPLETE</em></b>Receiver checks SHA-256, publishes without overwrite, and confirms completion.</div>
+  </div></section>
+</main>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const log = $('log'); let total = 0; let packetQueue=[]; let packetBusy=false;
+  const sizeText = (n) => { if (n < 1024) return `${n} B`; if (n < 1048576) return `${(n/1024).toFixed(1)} KiB`; return `${(n/1048576).toFixed(2)} MiB`; };
+  function line(label, message) { const row=document.createElement('div'); row.className='logrow'; const t=document.createElement('time'); t.textContent=new Date().toLocaleTimeString(); const d=document.createElement('div'); const tag=document.createElement('span'); tag.className='tag'; tag.textContent=label; d.append(tag,document.createTextNode(` ${message}`)); row.append(t,d); log.prepend(row); }
+  function packet(direction='data') { packetQueue.push(direction); if(packetBusy)return; packetBusy=true; const run=()=>{const next=packetQueue.shift();if(!next){packetBusy=false;return;}const p=$('packet');p.className=`packet ${next==='ack'?'return':'fly'}`;setTimeout(run,280);};run(); }
+  function handle(e) {
+    if(e.name && e.size) total=e.size;
+    if(e.transferId){$('resume').value=e.transferId;$('idtext').textContent=e.transferId;$('idline').style.display='block';}
+    if(e.phase==='offer'){ $('status').textContent=`OFFER: ${e.name} · ${sizeText(e.size)}`; $('dot').classList.add('live'); line('OFFER',`${e.name} · ${sizeText(e.size)} · id ${e.transferId}`); }
+    else if(e.phase==='ready'){ $('status').textContent=e.offset?`Resume from byte ${e.offset}`:'Receiver ready at byte 0'; line('READY',`receiver requests offset ${e.offset}`); }
+    else if(e.phase==='chunk-sent'){packet('data');line('DATA',`sent ${sizeText(e.bytes)} starting at ${e.offset}`);}
+    else if(e.phase==='chunk'){packet('data');line('DISK SYNC',`${sizeText(e.bytes)} saved · next offset ${e.offset}`);}
+    else if(e.phase==='ack' || e.phase==='ack-sent'){packet('ack');const offset=e.offset||0;const pct=total?Math.min(100,offset/total*100):0;$('bar').style.width=`${pct}%`;$('amount').textContent=`${sizeText(offset)} / ${sizeText(total)}`;$('percent').textContent=`${pct.toFixed(1)}%`;$('status').textContent=`Chunk saved and acknowledged · ${sizeText(offset)} received`;line('ACK',`next offset ${offset}`);}
+    else if(e.phase==='verify'){ $('status').textContent='All bytes staged · checking SHA-256';line('VERIFY','receiver hashes the complete staged file'); }
+    else if(e.phase==='finish'){ $('status').textContent='FINISH sent · awaiting verification';line('FINISH','sender declares no more data'); }
+    else if(e.phase==='complete'){ $('status').textContent='Complete · digest verified';$('bar').style.width='100%';$('percent').textContent='100%';$('amount').textContent=`${sizeText(total)} / ${sizeText(total)}`;$('dot').classList.add('live');line('COMPLETE',`verified and published${e.digest?` · SHA-256 ${e.digest.slice(0,16)}…`:''}`); }
+    else if(e.phase==='error'){ $('status').textContent=`Transfer stopped: ${e.message}`;line('ERROR',e.message); }
+    else if(e.phase==='handoff-complete'){line('LOCAL HANDOFF',`${e.name} ready for LFTP sender`);}
+  }
+  const events = new EventSource('/api/events'); events.onmessage=(event)=>{try{handle(JSON.parse(event.data));}catch{}};
+  $('send').addEventListener('click',async()=>{
+    const file=$('file').files[0], host=$('host').value.trim(), port=$('port').value.trim();
+    if(!file||!host){$('status').textContent='Choose a file and enter the receiver IP.';return;}
+    $('send').disabled=true; $('send').textContent='Transferring…'; $('bar').style.width='0%'; total=file.size;log.replaceChildren();
+    const query=new URLSearchParams({host,port,name:file.name}); const id=$('resume').value.trim();if(id)query.set('id',id);
+    try{const response=await fetch(`/api/send?${query}`,{method:'POST',headers:{'content-type':'application/octet-stream'},body:file});const result=await response.json();if(!response.ok)throw new Error(result.error||'Transfer failed');$('status').textContent='Complete · digest verified';}
+    catch(error){$('status').textContent=`Transfer stopped: ${error.message}`;line('ERROR',error.message);}
+    finally{$('send').disabled=false;$('send').textContent='Start transfer';}
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "lan-file-transfer-protocol",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Educational single-file LAN transfer prototype over TCP",
+  "scripts": {
+    "receive": "node src/cli.js receive",
+    "send": "node src/cli.js send",
+    "demo": "node src/cli.js demo",
+    "web": "node src/cli.js web",
+    "make-demo-file": "node scripts/create-demo-file.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
