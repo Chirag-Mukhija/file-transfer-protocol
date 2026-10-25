@@ -52,6 +52,8 @@ This is a project question, not a claim that the proposed protocol is novel or w
 
 The filled template deck is [available here](output/college/College_Mini_Project_Review_1.pptx). It still needs the students' names/USNs and the guide's name/designation. Review the submission requirements in [the college demo brief](docs/college-demo-brief.md) before submission.
 
+For step-by-step setup and file transfer on two laptops, see [usage.md](usage.md).
+
 ## Next steps
 
 1. Replace the student/USN and guide placeholders in the college deck; agree on the title, domain, and SDG mapping with the guide.
